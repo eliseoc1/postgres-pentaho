@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:  
+
+  db:
+    container_name: pg_container_pentaho
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/pentaho-init.sql:/docker-entrypoint-initdb.d/pentaho-init.sql
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./tmp:/opt
+  pgadmin:
+    container_name: pgadmin4_container_pentaho
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+  pentaho:
+    container_name: pentaho_container_server
+    build:
+      context: ./pentaho-v2
+      dockerfile: Dockerfile 
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - pgadmin
